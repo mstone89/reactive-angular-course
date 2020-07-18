@@ -25,9 +25,20 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
+    const courses$ = this.courses.loadAllCourses()
+      .pipe(
+        map(courses => courses.sort(sortCoursesBySeqNo))
+      );
 
-    const courses$ = this.courses.loadAllCourses();
+    this.beginnerCourses$ = courses$
+        .pipe(
+          map(courses => courses.filter(course => course.category === 'BEGINNER'))
+        );
 
+    this.advancedCourses$ = courses$
+        .pipe(
+          map(courses => courses.filter(course => course.category === 'ADVANCED'))
+        );
   }
 
   editCourse(course: Course) {
