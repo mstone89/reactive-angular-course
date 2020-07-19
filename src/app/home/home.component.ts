@@ -18,6 +18,10 @@ export class HomeComponent implements OnInit {
   constructor(private courses: CoursesService) { }
 
   ngOnInit() {
+    this.reloadCourses();
+  }
+
+  reloadCourses() {
     const courses$ = this.courses.loadAllCourses()
       .pipe(
         map(courses => courses.sort(sortCoursesBySeqNo))
