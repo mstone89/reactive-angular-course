@@ -5,6 +5,7 @@ import { catchError, delay, delayWhen, filter, finalize, map, retryWhen, shareRe
 
 import { CoursesService } from '../services/courses.service';
 import { LoadingService } from '../loading/loading.service';
+import { MessagesService } from '../messages/messages.service';
 
 
 @Component({
@@ -18,7 +19,8 @@ export class HomeComponent implements OnInit {
 
     constructor(
         private courses: CoursesService,
-        private loading: LoadingService
+        private loading: LoadingService,
+        private messages: MessagesService
     ) { }
 
     ngOnInit() {
@@ -26,12 +28,15 @@ export class HomeComponent implements OnInit {
     }
 
     reloadCourses() {
-        this.loading.loadingOn();
-
         const courses$ = this.courses.loadAllCourses()
             .pipe(
                 map(courses => courses.sort(sortCoursesBySeqNo)),
-                finalize(() => this.loading.loadingOff())
+                catchError((err) => {
+                    const message = 'Could not load courses';
+                    this.messages.showErrors(message);
+                    console.log(message, err);
+                    return throwError(err);
+                })
             );
 
         const loadCourses$ = this.loading.showLoaderUntilCompleted(courses$);
