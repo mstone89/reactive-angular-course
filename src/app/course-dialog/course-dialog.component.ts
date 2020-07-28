@@ -8,6 +8,7 @@ import * as moment from 'moment';
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { MessagesService } from '../messages/messages.service';
+import { CoursesStore } from '../services/courses.store';
 
 @Component({
     selector: 'course-dialog',
@@ -28,8 +29,7 @@ export class CourseDialogComponent implements AfterViewInit {
         private fb: FormBuilder,
         private dialogRef: MatDialogRef<CourseDialogComponent>,
         @Inject(MAT_DIALOG_DATA) course: Course,
-        private courseService: CoursesService,
-        private loading: LoadingService,
+        private coursesStore: CoursesStore,
         private messages: MessagesService) {
 
         this.course = course;
@@ -50,18 +50,9 @@ export class CourseDialogComponent implements AfterViewInit {
     save() {
         const changes = this.form.value;
 
-        const saveCourse$ = this.courseService.saveCourse(this.course.id, changes)
-            .pipe(
-                catchError(err => {
-                    const message = 'Could not save course';
-                    console.log(message, err);
-                    this.messages.showErrors(message);
-                    return throwError(err);
-                })
-            );
+        this.coursesStore.saveCourse(this.course.id, changes).subscribe();
 
-        this.loading.showLoaderUntilCompleted(saveCourse$)
-            .subscribe((result) => this.dialogRef.close(result));
+        this.dialogRef.close(changes);
     }
 
     close() {
